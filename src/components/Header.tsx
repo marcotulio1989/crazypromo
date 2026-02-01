@@ -22,6 +22,9 @@ export default function Header() {
             <Link href="/" className="hover:text-orange-200 transition-colors">
               Promoções
             </Link>
+            <Link href="/comparar" className="hover:text-orange-200 transition-colors">
+              ⚖️ Comparar
+            </Link>
             <Link href="/categorias" className="hover:text-orange-200 transition-colors">
               Categorias
             </Link>
@@ -68,6 +71,9 @@ export default function Header() {
             <div className="flex flex-col gap-4">
               <Link href="/" className="hover:text-orange-200 transition-colors">
                 Promoções
+              </Link>
+              <Link href="/comparar" className="hover:text-orange-200 transition-colors">
+                ⚖️ Comparar Preços
               </Link>
               <Link href="/categorias" className="hover:text-orange-200 transition-colors">
                 Categorias

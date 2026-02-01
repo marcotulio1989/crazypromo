@@ -13,7 +13,9 @@ import {
   BarChart3,
   Settings,
   LogOut,
-  Link as LinkIcon
+  Link as LinkIcon,
+  Download,
+  Scale
 } from 'lucide-react'
 
 interface AdminSidebarProps {
@@ -28,6 +30,8 @@ const menuItems = [
   { href: '/admin/promocoes', label: 'Promoções', icon: Tag },
   { href: '/admin/produtos', label: 'Produtos', icon: Package },
   { href: '/admin/lojas', label: 'Lojas & Afiliados', icon: Store },
+  { href: '/admin/feeds', label: 'Importar Feeds', icon: Download },
+  { href: '/admin/comparador', label: 'Comparador', icon: Scale },
   { href: '/admin/categorias', label: 'Categorias', icon: FolderTree },
   { href: '/admin/relatorios', label: 'Relatórios', icon: BarChart3 },
   { href: '/admin/configuracoes', label: 'Configurações', icon: Settings },

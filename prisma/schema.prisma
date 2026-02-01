@@ -78,6 +78,10 @@ model Store {
   affiliateUrl    String?  // URL base do programa de afiliados
   affiliateId     String?  // ID do afiliado nesta loja
   commission      Float?   // Porcentagem de comissão
+  feedUrl         String?  // URL do feed de produtos (Lomadee, Awin, CSV)
+  feedType        String?  // Tipo: lomadee, awin, csv, json
+  feedMapping     Json?    // Mapeamento de campos para CSV
+  lastFeedSync    DateTime? // Última sincronização do feed
   isActive        Boolean  @default(true)
   products        Product[]
   createdAt       DateTime @default(now())
@@ -99,6 +103,10 @@ model Product {
   lowestPrice     Float?         // Menor preço histórico
   highestPrice    Float?         // Maior preço histórico
   averagePrice    Float?         // Preço médio histórico
+  externalId      String?        // ID do produto na loja/feed
+  ean             String?        // Código de barras (EAN/UPC) - para match entre lojas
+  sku             String?        // SKU do produto
+  brand           String?        // Marca do produto
   category        Category?      @relation(fields: [categoryId], references: [id])
   categoryId      String?
   store           Store          @relation(fields: [storeId], references: [id])
@@ -114,6 +122,8 @@ model Product {
   @@index([storeId])
   @@index([categoryId])
   @@index([currentPrice])
+  @@index([ean])
+  @@index([externalId, storeId])
 }
 
 model PriceHistory {
