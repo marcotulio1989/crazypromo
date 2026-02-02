@@ -201,18 +201,18 @@ export default function PromotionCard({ promotion, onOpenModal }: PromotionCardP
         {/* Botões */}
         <div className="flex gap-2">
           <button
-            onClick={handleViewInSplit}
+            onClick={handleQuickBuy}
             className="flex-1 bg-gray-100 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-200 transition-all flex items-center justify-center gap-2"
           >
-            <Columns className="w-4 h-4" />
-            Ver Loja
+            <ExternalLink className="w-4 h-4" />
+            Ver Detalhes
           </button>
           <button
-            onClick={handleQuickBuy}
+            onClick={handleViewInSplit}
             className="flex-1 bg-gradient-to-r from-orange-500 to-red-600 text-white py-3 rounded-lg font-semibold hover:from-orange-600 hover:to-red-700 transition-all flex items-center justify-center gap-2"
           >
             Comprar
-            <ExternalLink className="w-4 h-4" />
+            <Columns className="w-4 h-4" />
           </button>
         </div>
       </div>
