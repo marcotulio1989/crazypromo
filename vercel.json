@@ -2,5 +2,21 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "nextjs",
   "buildCommand": "npm run build",
-  "installCommand": "npm install"
+  "installCommand": "npm install",
+  "functions": {
+    "src/app/api/**": {
+      "maxDuration": 30,
+      "memory": 1024
+    },
+    "src/app/api/cron/**": {
+      "maxDuration": 60,
+      "memory": 1024
+    }
+  },
+  "crons": [
+    {
+      "path": "/api/cron/update-prices",
+      "schedule": "0 */6 * * *"
+    }
+  ]
 }
