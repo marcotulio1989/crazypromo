@@ -49,7 +49,7 @@ export default function SplitViewLayout({ children }: SplitViewLayoutProps) {
           className="fixed inset-0 bg-black/30 z-40 lg:hidden backdrop-blur-sm"
           onClick={closePanel}
         />
-      )}}
+      )}
     </div>
   )
 }
