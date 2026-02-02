@@ -243,6 +243,60 @@ async function processProduct(product: FeedProduct, storeId: string): Promise<vo
 }
 
 /**
+ * Busca produtos por EAN ou nome (usado na comparação de preços)
+ */
+export async function findProductsByEanOrName(ean?: string, name?: string): Promise<Array<{
+  id: string;
+  name: string;
+  ean: string | null;
+  brand: string | null;
+  image: string | null;
+  price: number;
+  originalPrice: number | null;
+  discount: number | null;
+  affiliateLink: string | null;
+  inStock: boolean;
+  storeId: string;
+  store?: { name: string; logo: string | null } | null;
+}>> {
+  const where: Record<string, unknown> = {
+    isActive: true
+  }
+
+  if (ean) {
+    where.ean = ean
+  } else if (name) {
+    const keywords = name.toLowerCase().split(' ').filter(w => w.length > 3)
+    if (keywords.length > 0) {
+      where.OR = keywords.slice(0, 3).map(kw => ({
+        name: { contains: kw, mode: 'insensitive' as const }
+      }))
+    }
+  }
+
+  const products = await prisma.product.findMany({
+    where,
+    include: { store: true },
+    take: 100
+  })
+
+  return products.map(p => ({
+    id: p.id,
+    name: p.name,
+    ean: p.ean,
+    brand: p.brand,
+    image: p.image,
+    price: p.currentPrice,
+    originalPrice: p.originalPrice,
+    discount: p.originalPrice ? Math.round((1 - p.currentPrice / p.originalPrice) * 100) : null,
+    affiliateLink: p.affiliateUrl,
+    inStock: p.isActive,
+    storeId: p.storeId,
+    store: p.store
+  }))
+}
+
+/**
  * Busca produtos similares entre lojas (pelo EAN ou nome similar)
  */
 export async function findSimilarProducts(productId: string): Promise<Array<{

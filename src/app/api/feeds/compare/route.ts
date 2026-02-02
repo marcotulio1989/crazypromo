@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
-import { findSimilarProducts, getBestPrices } from '@/lib/feed-importer'
+import { findProductsByEanOrName, getBestPrices } from '@/lib/feed-importer'
 
 // GET - Buscar produtos similares e comparar preços
 export async function GET(request: NextRequest) {
@@ -21,7 +20,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Buscar produtos similares
-    const products = await findSimilarProducts(ean || undefined, name || undefined)
+    const products = await findProductsByEanOrName(ean || undefined, name || undefined)
 
     // Agrupar por loja e calcular economia
     const grouped = products.reduce((acc, product) => {
