@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { Plus, Search, Edit, Trash2, ExternalLink, Settings } from 'lucide-react'
+import { Plus, Search, Edit, Trash2, ExternalLink, Settings, Download, FileJson, FileSpreadsheet } from 'lucide-react'
 
 interface AffiliateConfig {
   type: string
@@ -143,7 +143,29 @@ export default function AdminLojas() {
                 </div>
               </div>
 
+              {/* Botões de Download */}
               <div className="flex gap-2 mt-4 pt-4 border-t">
+                <a
+                  href={`/api/stores/${store.id}/export?format=json`}
+                  download
+                  className="flex items-center justify-center gap-1 px-3 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors text-sm"
+                  title="Baixar JSON com todos os dados"
+                >
+                  <FileJson className="w-4 h-4" />
+                  JSON
+                </a>
+                <a
+                  href={`/api/stores/${store.id}/export?format=csv`}
+                  download
+                  className="flex items-center justify-center gap-1 px-3 py-2 bg-green-50 text-green-600 rounded-lg hover:bg-green-100 transition-colors text-sm"
+                  title="Baixar CSV para Excel"
+                >
+                  <FileSpreadsheet className="w-4 h-4" />
+                  CSV
+                </a>
+              </div>
+
+              <div className="flex gap-2 mt-2">
                 <button
                   onClick={() => { setEditingStore(store); setShowModal(true) }}
                   className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
