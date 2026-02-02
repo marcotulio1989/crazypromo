@@ -4,6 +4,12 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Plus, Search, Edit, Trash2, ExternalLink, Settings } from 'lucide-react'
 
+interface AffiliateConfig {
+  type: string
+  paramName?: string
+  customTemplate?: string
+}
+
 interface Store {
   id: string
   name: string
@@ -11,6 +17,8 @@ interface Store {
   logo: string | null
   website: string
   affiliateId: string | null
+  affiliateUrl: string | null
+  affiliateConfig: AffiliateConfig | null
   commission: number | null
   isActive: boolean
   _count: {
@@ -117,8 +125,14 @@ export default function AdminLojas() {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-500">ID Afiliado:</span>
-                  <span className="font-medium font-mono">
-                    {store.affiliateId || <span className="text-red-500">Não configurado</span>}
+                  <span className="font-medium font-mono text-xs">
+                    {store.affiliateId || <span className="text-red-500">⚠️ Não configurado</span>}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Tipo:</span>
+                  <span className="font-medium text-xs">
+                    {store.affiliateConfig?.type === 'custom' ? '🔗 Template' : '📎 Query param'}
                   </span>
                 </div>
                 <div className="flex justify-between">
@@ -175,10 +189,11 @@ function StoreModal({
     website: store?.website || '',
     logo: store?.logo || '',
     affiliateId: store?.affiliateId || '',
-    affiliateUrl: '',
+    affiliateUrl: store?.affiliateUrl || '',
     commission: store?.commission?.toString() || '',
-    affiliateType: 'query_param',
-    affiliateParamName: 'tag',
+    affiliateType: store?.affiliateConfig?.type || 'query_param',
+    affiliateParamName: store?.affiliateConfig?.paramName || 'tag',
+    customTemplate: store?.affiliateConfig?.customTemplate || '',
     isActive: store?.isActive ?? true
   })
   const [loading, setLoading] = useState(false)
@@ -190,7 +205,8 @@ function StoreModal({
     try {
       const affiliateConfig = {
         type: formData.affiliateType,
-        paramName: formData.affiliateParamName
+        paramName: formData.affiliateParamName,
+        customTemplate: formData.customTemplate
       }
 
       const url = store ? `/api/stores/${store.id}` : '/api/stores'
@@ -271,50 +287,111 @@ function StoreModal({
           </div>
 
           <hr className="my-4" />
-          <h3 className="font-semibold text-gray-800">Configuração de Afiliados</h3>
+          <h3 className="font-semibold text-gray-800 flex items-center gap-2">
+            🔗 Configuração de Links de Afiliados
+          </h3>
+          <p className="text-sm text-gray-500 mb-2">
+            Configure como os links de produtos serão transformados em links de afiliados
+          </p>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              ID de Afiliado
+              Seu ID de Afiliado *
             </label>
             <input
               type="text"
               value={formData.affiliateId}
               onChange={(e) => setFormData({ ...formData, affiliateId: e.target.value })}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-transparent font-mono"
-              placeholder="seu-id-de-afiliado"
+              placeholder="ex: crazypromo-20 (Amazon), 12345 (Lomadee)"
             />
+            <p className="text-xs text-gray-500 mt-1">
+              Este é o ID que você recebeu ao se cadastrar no programa de afiliados
+            </p>
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Tipo de Link
+              URL Base de Afiliados (opcional)
+            </label>
+            <input
+              type="url"
+              value={formData.affiliateUrl}
+              onChange={(e) => setFormData({ ...formData, affiliateUrl: e.target.value })}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-transparent font-mono text-sm"
+              placeholder="ex: https://redir.lomadee.com/v2/deeplink"
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              Para redes como Lomadee ou Awin, coloque a URL base do redirecionamento
+            </p>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Tipo de Link de Afiliado
             </label>
             <select
               value={formData.affiliateType}
               onChange={(e) => setFormData({ ...formData, affiliateType: e.target.value })}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-transparent"
             >
-              <option value="query_param">Parâmetro de Query (ex: ?tag=ID)</option>
-              <option value="custom">Template Customizado</option>
+              <option value="query_param">Parâmetro de Query (ex: Amazon, Kabum)</option>
+              <option value="custom">Template Customizado (ex: Lomadee, Awin)</option>
             </select>
           </div>
 
           {formData.affiliateType === 'query_param' && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Nome do Parâmetro
-              </label>
-              <input
-                type="text"
-                value={formData.affiliateParamName}
-                onChange={(e) => setFormData({ ...formData, affiliateParamName: e.target.value })}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-transparent font-mono"
-                placeholder="tag"
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                O link ficará: produto-url?{formData.affiliateParamName}={formData.affiliateId || 'SEU_ID'}
-              </p>
+            <div className="bg-gray-50 p-4 rounded-lg space-y-3">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Nome do Parâmetro
+                </label>
+                <input
+                  type="text"
+                  value={formData.affiliateParamName}
+                  onChange={(e) => setFormData({ ...formData, affiliateParamName: e.target.value })}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-transparent font-mono"
+                  placeholder="tag"
+                />
+              </div>
+              <div className="bg-white p-3 rounded border text-sm">
+                <span className="text-gray-500">Preview do link:</span>
+                <code className="block mt-1 text-orange-600 break-all">
+                  https://loja.com/produto?{formData.affiliateParamName || 'tag'}={formData.affiliateId || 'SEU_ID'}
+                </code>
+              </div>
+            </div>
+          )}
+
+          {formData.affiliateType === 'custom' && (
+            <div className="bg-gray-50 p-4 rounded-lg space-y-3">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Template do Link
+                </label>
+                <textarea
+                  value={formData.customTemplate}
+                  onChange={(e) => setFormData({ ...formData, customTemplate: e.target.value })}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-transparent font-mono text-sm"
+                  rows={3}
+                  placeholder="https://redir.lomadee.com/v2/deeplink?sourceId={affiliateId}&url={url}"
+                />
+              </div>
+              <div className="text-xs text-gray-600">
+                <p className="font-medium mb-1">Variáveis disponíveis:</p>
+                <ul className="list-disc list-inside space-y-1">
+                  <li><code className="bg-gray-200 px-1 rounded">{'{url}'}</code> - URL original do produto (codificada)</li>
+                  <li><code className="bg-gray-200 px-1 rounded">{'{affiliateId}'}</code> - Seu ID de afiliado</li>
+                  <li><code className="bg-gray-200 px-1 rounded">{'{merchantId}'}</code> - ID do merchant (para Awin)</li>
+                </ul>
+              </div>
+              <div className="bg-blue-50 p-3 rounded border border-blue-200 text-xs">
+                <p className="font-medium text-blue-800 mb-1">📋 Templates comuns:</p>
+                <ul className="space-y-1 text-blue-700">
+                  <li><strong>Lomadee:</strong> https://redir.lomadee.com/v2/deeplink?sourceId={'{affiliateId}'}&url={'{url}'}</li>
+                  <li><strong>Awin:</strong> https://www.awin1.com/cread.php?awinmid={'{merchantId}'}&awinaffid={'{affiliateId}'}&p={'{url}'}</li>
+                </ul>
+              </div>
             </div>
           )}
 
