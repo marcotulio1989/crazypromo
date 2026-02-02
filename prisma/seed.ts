@@ -4,7 +4,16 @@ import { PrismaPg } from '@prisma/adapter-pg'
 import pg from 'pg'
 import bcrypt from 'bcryptjs'
 
-const databaseUrl = process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/crazypromo'
+// Use localhost only in development
+const databaseUrl = process.env.DATABASE_URL || 
+  (process.env.NODE_ENV !== 'production' 
+    ? 'postgresql://postgres:postgres@localhost:5432/crazypromo'
+    : undefined)
+
+if (!databaseUrl) {
+  throw new Error('DATABASE_URL environment variable is required for seeding')
+}
+
 const pool = new pg.Pool({ connectionString: databaseUrl })
 const adapter = new PrismaPg(pool)
 const prisma = new PrismaClient({ adapter })
@@ -12,19 +21,31 @@ const prisma = new PrismaClient({ adapter })
 async function main() {
   console.log('🌱 Iniciando seed do banco de dados...')
 
-  // Criar usuário admin
-  const adminPassword = await bcrypt.hash(process.env.ADMIN_PASSWORD || 'admin123', 10)
+  // Generate secure admin password if not provided
+  const adminPassword = process.env.ADMIN_PASSWORD 
+    ? await bcrypt.hash(process.env.ADMIN_PASSWORD, 10)
+    : await bcrypt.hash(
+        Math.random().toString(36).slice(-12) + Math.random().toString(36).slice(-12), 
+        10
+      )
+  
+  const adminEmail = process.env.ADMIN_EMAIL || 'admin@crazypromo.com'
   
   const admin = await prisma.user.upsert({
-    where: { email: process.env.ADMIN_EMAIL || 'admin@crazypromo.com' },
+    where: { email: adminEmail },
     update: {},
     create: {
-      email: process.env.ADMIN_EMAIL || 'admin@crazypromo.com',
+      email: adminEmail,
       name: 'Administrador',
       password: adminPassword,
       role: 'ADMIN'
     }
   })
+  
+  if (!process.env.ADMIN_PASSWORD) {
+    console.log('⚠️  No ADMIN_PASSWORD provided - a random password was generated')
+    console.log('⚠️  For production, set ADMIN_PASSWORD environment variable')
+  }
   console.log('✅ Usuário admin criado:', admin.email)
 
   // Criar categorias
