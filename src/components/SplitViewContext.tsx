@@ -35,7 +35,8 @@ interface SplitViewContextType {
   isPanelOpen: boolean
   popupWindow: Window | null
   popupBlocked: boolean
-  openPanel: (promotion: Promotion) => void
+  openPanelOnly: (promotion: Promotion) => void
+  openPanelWithPopup: (promotion: Promotion) => void
   closePanel: () => void
   retryPopup: () => void
 }
@@ -61,13 +62,13 @@ export function SplitViewProvider({ children }: SplitViewProviderProps) {
   const [popupBlocked, setPopupBlocked] = useState(false)
   const [redirectUrl, setRedirectUrl] = useState<string | null>(null)
 
-  // Monitora quando a popup é fechada
+  // Monitora quando a popup é fechada (apenas atualiza estado, NÃO fecha o painel)
   useEffect(() => {
     if (!popupWindow) return
 
     const checkPopupClosed = setInterval(() => {
       if (popupWindow.closed) {
-        closePanel()
+        setPopupWindow(null)
       }
     }, 500)
 
@@ -102,7 +103,33 @@ export function SplitViewProvider({ children }: SplitViewProviderProps) {
     }
   }, [])
 
-  const openPanel = useCallback(async (promotion: Promotion) => {
+  // Abre apenas o painel com detalhes (sem popup)
+  const openPanelOnly = useCallback(async (promotion: Promotion) => {
+    setSelectedPromotion(promotion)
+    setIsPanelOpen(true)
+    
+    // Apenas pré-carrega a URL para uso posterior
+    try {
+      const response = await fetch('/api/clicks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          productId: promotion.product.id,
+          promotionId: promotion.id 
+        })
+      })
+      
+      const data = await response.json()
+      const url = data.redirectUrl || promotion.product.affiliateUrl || promotion.product.originalUrl
+      setRedirectUrl(url)
+    } catch {
+      const url = promotion.product.affiliateUrl || promotion.product.originalUrl
+      setRedirectUrl(url)
+    }
+  }, [])
+
+  // Abre o painel E a popup da loja
+  const openPanelWithPopup = useCallback(async (promotion: Promotion) => {
     setSelectedPromotion(promotion)
     setIsPanelOpen(true)
     setPopupBlocked(false)
@@ -161,7 +188,8 @@ export function SplitViewProvider({ children }: SplitViewProviderProps) {
         isPanelOpen, 
         popupWindow,
         popupBlocked,
-        openPanel, 
+        openPanelOnly,
+        openPanelWithPopup, 
         closePanel,
         retryPopup
       }}

@@ -40,39 +40,23 @@ interface PromotionCardProps {
 export default function PromotionCard({ promotion, onOpenModal }: PromotionCardProps) {
   const { product } = promotion
   const isLowestPrice = product.lowestPrice && promotion.promotionPrice <= product.lowestPrice
-  const { openPanel } = useSplitView()
+  const { openPanelOnly, openPanelWithPopup } = useSplitView()
   
-  const handleQuickBuy = async (e: React.MouseEvent) => {
+  // Ver Detalhes - apenas abre o painel com informações
+  const handleViewDetails = (e: React.MouseEvent) => {
     e.stopPropagation()
-    // Registrar clique e abrir diretamente
-    try {
-      const response = await fetch('/api/clicks', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          productId: product.id,
-          promotionId: promotion.id 
-        })
-      })
-      
-      const data = await response.json()
-      if (data.redirectUrl) {
-        window.open(data.redirectUrl, '_blank')
-      }
-    } catch (error) {
-      // Fallback: abrir URL diretamente
-      window.open(product.affiliateUrl || product.originalUrl, '_blank')
-    }
+    openPanelOnly(promotion)
+  }
+
+  // Comprar - abre o painel E a popup da loja
+  const handleBuy = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    openPanelWithPopup(promotion)
   }
 
   const handleCardClick = () => {
-    // Usar split view ao invés de modal
-    openPanel(promotion)
-  }
-
-  const handleViewInSplit = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    openPanel(promotion)
+    // Click no card abre apenas os detalhes
+    openPanelOnly(promotion)
   }
 
   const getDealScoreColor = (score: number | null) => {
@@ -201,14 +185,14 @@ export default function PromotionCard({ promotion, onOpenModal }: PromotionCardP
         {/* Botões */}
         <div className="flex gap-2">
           <button
-            onClick={handleViewInSplit}
+            onClick={handleViewDetails}
             className="flex-1 bg-gray-100 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-200 transition-all flex items-center justify-center gap-2"
           >
             <Columns className="w-4 h-4" />
-            Ver Loja
+            Ver Detalhes
           </button>
           <button
-            onClick={handleQuickBuy}
+            onClick={handleBuy}
             className="flex-1 bg-gradient-to-r from-orange-500 to-red-600 text-white py-3 rounded-lg font-semibold hover:from-orange-600 hover:to-red-700 transition-all flex items-center justify-center gap-2"
           >
             Comprar
