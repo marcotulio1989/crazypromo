@@ -22,7 +22,12 @@ const prisma = new PrismaClient({ adapter })
 async function main() {
   console.log('🌱 Iniciando seed do banco de dados...')
 
-  // Generate secure admin password if not provided
+  // Require ADMIN_PASSWORD in production
+  if (process.env.NODE_ENV === 'production' && !process.env.ADMIN_PASSWORD) {
+    throw new Error('ADMIN_PASSWORD environment variable is required for production seeding')
+  }
+
+  // Generate secure admin password (development only fallback)
   const adminPassword = process.env.ADMIN_PASSWORD 
     ? await bcrypt.hash(process.env.ADMIN_PASSWORD, 10)
     : await bcrypt.hash(
@@ -44,8 +49,8 @@ async function main() {
   })
   
   if (!process.env.ADMIN_PASSWORD) {
-    console.log('⚠️  No ADMIN_PASSWORD provided - a random password was generated')
-    console.log('⚠️  For production, set ADMIN_PASSWORD environment variable')
+    console.log('⚠️  No ADMIN_PASSWORD provided - using random password for development')
+    console.log('⚠️  This is only allowed in development mode')
   }
   console.log('✅ Usuário admin criado:', admin.email)
 

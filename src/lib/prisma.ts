@@ -2,11 +2,6 @@ import { PrismaClient } from '@prisma/client'
 import { PrismaPg } from '@prisma/adapter-pg'
 import pg from 'pg'
 
-// Validate DATABASE_URL in production
-if (process.env.NODE_ENV === 'production' && !process.env.DATABASE_URL) {
-  throw new Error('DATABASE_URL environment variable is required in production')
-}
-
 // Use localhost only in development
 const databaseUrl = process.env.DATABASE_URL || 
   (process.env.NODE_ENV !== 'production' 

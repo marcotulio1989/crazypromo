@@ -4,10 +4,14 @@ import prisma from '@/lib/prisma'
 /**
  * Cron job to update product prices
  * 
- * This endpoint should be called by Vercel Cron or an external scheduler
- * to periodically update product prices and recalculate deal scores.
+ * NOTE: This is a placeholder implementation. In production, you should:
+ * 1. Implement actual price scraping from store URLs
+ * 2. Create price history records for tracking
+ * 3. Update product current/lowest/highest prices
+ * 4. Recalculate deal scores for active promotions
  * 
- * See vercel.json for the configured schedule (every 6 hours)
+ * This endpoint is configured to run every 6 hours via Vercel Cron.
+ * See vercel.json for the schedule configuration.
  */
 export async function GET(request: NextRequest) {
   try {
