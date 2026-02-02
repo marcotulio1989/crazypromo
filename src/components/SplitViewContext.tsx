@@ -61,13 +61,14 @@ export function SplitViewProvider({ children }: SplitViewProviderProps) {
   const [popupBlocked, setPopupBlocked] = useState(false)
   const [redirectUrl, setRedirectUrl] = useState<string | null>(null)
 
-  // Monitora quando a popup é fechada
+  // Monitora quando a popup é fechada (mantém painel aberto)
   useEffect(() => {
     if (!popupWindow) return
 
     const checkPopupClosed = setInterval(() => {
       if (popupWindow.closed) {
-        closePanel()
+        // Apenas atualiza o estado da popup, não fecha o painel
+        setPopupWindow(null)
       }
     }, 500)
 
