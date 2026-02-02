@@ -1,4 +1,3 @@
-import { prisma } from '@/lib/prisma'
 import { getBestPrices } from '@/lib/feed-importer'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
@@ -26,6 +25,16 @@ function formatPrice(price: number) {
 export default async function ComparePage() {
   const bestPrices = await getCompareData()
 
+  // Calcular estatísticas
+  const totalSavings = bestPrices.reduce((acc, p) => {
+    const prices = p.prices.map(pr => pr.price)
+    const maxPrice = Math.max(...prices)
+    const minPrice = Math.min(...prices)
+    return acc + (maxPrice - minPrice)
+  }, 0)
+
+  const uniqueStores = new Set(bestPrices.flatMap(p => p.prices.map(pr => pr.store)))
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
@@ -51,13 +60,13 @@ export default async function ComparePage() {
             </div>
             <div className="bg-white rounded-xl shadow-sm p-6 text-center">
               <p className="text-4xl font-bold text-green-500">
-                {formatPrice(bestPrices.reduce((acc, p) => acc + p.savings, 0))}
+                {formatPrice(totalSavings)}
               </p>
               <p className="text-gray-600">Economia Total Possível</p>
             </div>
             <div className="bg-white rounded-xl shadow-sm p-6 text-center">
               <p className="text-4xl font-bold text-blue-500">
-                {new Set(bestPrices.flatMap(p => p.offers.map(o => o.storeId))).size}
+                {uniqueStores.size}
               </p>
               <p className="text-gray-600">Lojas Monitoradas</p>
             </div>
@@ -83,123 +92,102 @@ export default async function ComparePage() {
           </div>
         ) : (
           <div className="space-y-6">
-            {bestPrices.map((product, index) => (
-              <div key={product.ean || index} className="bg-white rounded-xl shadow-sm overflow-hidden">
-                <div className="p-6">
-                  <div className="flex flex-col md:flex-row md:items-center gap-6">
-                    {/* Imagem */}
-                    {product.image && (
-                      <div className="w-24 h-24 flex-shrink-0">
-                        <img 
-                          src={product.image} 
-                          alt={product.name}
-                          className="w-full h-full object-contain"
-                        />
-                      </div>
-                    )}
+            {bestPrices.map((product, index) => {
+              const sortedPrices = [...product.prices].sort((a, b) => a.price - b.price)
+              const lowestPrice = sortedPrices[0]?.price || 0
+              const highestPrice = sortedPrices[sortedPrices.length - 1]?.price || 0
+              const savings = highestPrice - lowestPrice
 
-                    {/* Info */}
-                    <div className="flex-1">
-                      <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                        {product.name}
-                      </h3>
-                      <div className="flex flex-wrap gap-4 text-sm text-gray-500">
-                        {product.brand && (
-                          <span className="bg-gray-100 px-3 py-1 rounded-full">
-                            {product.brand}
-                          </span>
-                        )}
-                        {product.ean && (
-                          <span className="bg-gray-100 px-3 py-1 rounded-full">
-                            EAN: {product.ean}
-                          </span>
-                        )}
-                        <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full">
-                          {product.storeCount} {product.storeCount === 1 ? 'loja' : 'lojas'}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Preços */}
-                    <div className="text-center md:text-right">
-                      <div className="flex items-center gap-4">
-                        {product.savings > 0 && (
-                          <div className="bg-green-100 text-green-700 px-4 py-2 rounded-lg">
-                            <p className="text-sm">Você economiza</p>
-                            <p className="font-bold">{formatPrice(product.savings)}</p>
-                          </div>
-                        )}
-                        <div>
-                          <p className="text-sm text-gray-500">Melhor preço</p>
-                          <p className="text-3xl font-bold text-green-600">
-                            {formatPrice(product.lowestPrice)}
-                          </p>
-                          {product.highestPrice > product.lowestPrice && (
-                            <p className="text-sm text-gray-400 line-through">
-                              até {formatPrice(product.highestPrice)}
-                            </p>
+              return (
+                <div key={product.ean || index} className="bg-white rounded-xl shadow-sm overflow-hidden">
+                  <div className="p-6">
+                    <div className="flex flex-col md:flex-row md:items-center gap-6">
+                      {/* Info */}
+                      <div className="flex-1">
+                        <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                          {product.name}
+                        </h3>
+                        <div className="flex flex-wrap gap-4 text-sm text-gray-500">
+                          {product.ean && (
+                            <span className="bg-gray-100 px-3 py-1 rounded-full">
+                              EAN: {product.ean}
+                            </span>
                           )}
+                          <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full">
+                            {product.prices.length} {product.prices.length === 1 ? 'loja' : 'lojas'}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Preços */}
+                      <div className="text-center md:text-right">
+                        <div className="flex items-center gap-4">
+                          {savings > 0 && (
+                            <div className="bg-green-100 text-green-700 px-4 py-2 rounded-lg">
+                              <p className="text-sm">Você economiza</p>
+                              <p className="font-bold">{formatPrice(savings)}</p>
+                            </div>
+                          )}
+                          <div>
+                            <p className="text-sm text-gray-500">Melhor preço</p>
+                            <p className="text-3xl font-bold text-green-600">
+                              {formatPrice(lowestPrice)}
+                            </p>
+                            {highestPrice > lowestPrice && (
+                              <p className="text-sm text-gray-400 line-through">
+                                até {formatPrice(highestPrice)}
+                              </p>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
-                </div>
 
-                {/* Ofertas */}
-                <div className="border-t border-gray-100 bg-gray-50 p-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {product.offers.map((offer, offerIndex) => (
-                      <div 
-                        key={offer.id || offerIndex}
-                        className={`bg-white rounded-lg p-4 border-2 ${
-                          offerIndex === 0 ? 'border-green-500' : 'border-transparent'
-                        }`}
-                      >
-                        <div className="flex items-center justify-between mb-2">
-                          <div className="flex items-center gap-2">
-                            {offer.storeLogo && (
-                              <img src={offer.storeLogo} alt="" className="w-6 h-6 rounded" />
-                            )}
-                            <span className="font-medium text-gray-800">{offer.storeName}</span>
-                          </div>
-                          {offerIndex === 0 && (
-                            <span className="bg-green-500 text-white text-xs px-2 py-1 rounded-full">
-                              MELHOR
-                            </span>
-                          )}
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className={`text-xl font-bold ${offerIndex === 0 ? 'text-green-600' : 'text-gray-900'}`}>
-                              {formatPrice(offer.price)}
-                            </p>
-                            {offer.discount && (
-                              <span className="text-orange-500 text-sm font-medium">
-                                -{offer.discount}% OFF
+                  {/* Ofertas */}
+                  <div className="border-t border-gray-100 bg-gray-50 p-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {sortedPrices.map((offer, offerIndex) => (
+                        <div 
+                          key={`${offer.store}-${offerIndex}`}
+                          className={`bg-white rounded-lg p-4 border-2 ${
+                            offerIndex === 0 ? 'border-green-500' : 'border-transparent'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="font-medium text-gray-800">{offer.store}</span>
+                            {offerIndex === 0 && (
+                              <span className="bg-green-500 text-white text-xs px-2 py-1 rounded-full">
+                                MELHOR
                               </span>
                             )}
                           </div>
-                          {offer.affiliateLink && (
-                            <a
-                              href={offer.affiliateLink}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
-                                offerIndex === 0 
-                                  ? 'bg-green-500 text-white hover:bg-green-600'
-                                  : 'bg-orange-500 text-white hover:bg-orange-600'
-                              }`}
-                            >
-                              IR À LOJA
-                            </a>
-                          )}
+                          <div className="flex items-center justify-between">
+                            <p className={`text-xl font-bold ${offerIndex === 0 ? 'text-green-600' : 'text-gray-900'}`}>
+                              {formatPrice(offer.price)}
+                            </p>
+                            {offer.url && (
+                              <a
+                                href={offer.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
+                                  offerIndex === 0 
+                                    ? 'bg-green-500 text-white hover:bg-green-600'
+                                    : 'bg-orange-500 text-white hover:bg-orange-600'
+                                }`}
+                              >
+                                IR À LOJA
+                              </a>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         )}
       </main>

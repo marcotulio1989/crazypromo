@@ -1,10 +1,10 @@
 'use client'
 
 import Image from 'next/image'
-import Link from 'next/link'
-import { ExternalLink, TrendingDown, AlertTriangle, Award, Clock } from 'lucide-react'
+import { ExternalLink, TrendingDown, AlertTriangle, Award, Clock, Columns } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
+import { useSplitView } from '@/components/SplitViewContext'
 
 interface PromotionCardProps {
   promotion: {
@@ -34,14 +34,17 @@ interface PromotionCardProps {
       } | null
     }
   }
+  onOpenModal?: () => void // Mantido para compatibilidade
 }
 
-export default function PromotionCard({ promotion }: PromotionCardProps) {
+export default function PromotionCard({ promotion, onOpenModal }: PromotionCardProps) {
   const { product } = promotion
   const isLowestPrice = product.lowestPrice && promotion.promotionPrice <= product.lowestPrice
+  const { openPanel } = useSplitView()
   
-  const handleClick = async () => {
-    // Registrar clique
+  const handleQuickBuy = async (e: React.MouseEvent) => {
+    e.stopPropagation()
+    // Registrar clique e abrir diretamente
     try {
       const response = await fetch('/api/clicks', {
         method: 'POST',
@@ -60,6 +63,16 @@ export default function PromotionCard({ promotion }: PromotionCardProps) {
       // Fallback: abrir URL diretamente
       window.open(product.affiliateUrl || product.originalUrl, '_blank')
     }
+  }
+
+  const handleCardClick = () => {
+    // Usar split view ao invés de modal
+    openPanel(promotion)
+  }
+
+  const handleViewInSplit = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    openPanel(promotion)
   }
 
   const getDealScoreColor = (score: number | null) => {
@@ -81,7 +94,10 @@ export default function PromotionCard({ promotion }: PromotionCardProps) {
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group">
+    <div 
+      className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group cursor-pointer"
+      onClick={handleCardClick}
+    >
       {/* Badges */}
       <div className="relative">
         {/* Imagem */}
@@ -182,14 +198,23 @@ export default function PromotionCard({ promotion }: PromotionCardProps) {
           })}
         </div>
 
-        {/* Botão */}
-        <button
-          onClick={handleClick}
-          className="w-full bg-gradient-to-r from-orange-500 to-red-600 text-white py-3 rounded-lg font-semibold hover:from-orange-600 hover:to-red-700 transition-all flex items-center justify-center gap-2"
-        >
-          Ver Oferta
-          <ExternalLink className="w-4 h-4" />
-        </button>
+        {/* Botões */}
+        <div className="flex gap-2">
+          <button
+            onClick={handleViewInSplit}
+            className="flex-1 bg-gray-100 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-200 transition-all flex items-center justify-center gap-2"
+          >
+            <Columns className="w-4 h-4" />
+            Ver Loja
+          </button>
+          <button
+            onClick={handleQuickBuy}
+            className="flex-1 bg-gradient-to-r from-orange-500 to-red-600 text-white py-3 rounded-lg font-semibold hover:from-orange-600 hover:to-red-700 transition-all flex items-center justify-center gap-2"
+          >
+            Comprar
+            <ExternalLink className="w-4 h-4" />
+          </button>
+        </div>
       </div>
     </div>
   )

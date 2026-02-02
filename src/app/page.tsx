@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { prisma } from '@/lib/prisma'
-import PromotionCard from '@/components/PromotionCard'
+import PromotionGrid from '@/components/PromotionGrid'
 import { Flame, TrendingUp, Shield, Zap } from 'lucide-react'
 
 async function getFeaturedPromotions() {
@@ -143,11 +143,9 @@ export default async function Home() {
                 Ver todas →
               </Link>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {featured.map((promo) => (
-                <PromotionCard key={promo.id} promotion={promo as unknown as Parameters<typeof PromotionCard>[0]['promotion']} />
-              ))}
-            </div>
+            <PromotionGrid 
+              promotions={featured as unknown as Parameters<typeof PromotionGrid>[0]['promotions']}
+            />
           </div>
         </section>
       )}
@@ -164,11 +162,9 @@ export default async function Home() {
                 Ver todas →
               </Link>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {bestDeals.map((promo) => (
-                <PromotionCard key={promo.id} promotion={promo as unknown as Parameters<typeof PromotionCard>[0]['promotion']} />
-              ))}
-            </div>
+            <PromotionGrid 
+              promotions={bestDeals as unknown as Parameters<typeof PromotionGrid>[0]['promotions']}
+            />
           </div>
         </section>
       )}
@@ -186,11 +182,9 @@ export default async function Home() {
           </div>
           
           {latest.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {latest.map((promo) => (
-                <PromotionCard key={promo.id} promotion={promo as unknown as Parameters<typeof PromotionCard>[0]['promotion']} />
-              ))}
-            </div>
+            <PromotionGrid 
+              promotions={latest as unknown as Parameters<typeof PromotionGrid>[0]['promotions']}
+            />
           ) : (
             <div className="text-center py-16 bg-gray-50 rounded-xl">
               <Flame className="w-16 h-16 mx-auto text-gray-300 mb-4" />
