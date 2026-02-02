@@ -7,14 +7,7 @@ import prisma from '@/lib/prisma'
  * This endpoint should be called by Vercel Cron or an external scheduler
  * to periodically update product prices and recalculate deal scores.
  * 
- * Configure in vercel.json:
- * {
- *   "crons": [{
- *     "path": "/api/cron/update-prices",
- *     "schedule": "0 0 star/6 star star star"
- *   }]
- * }
- * (Replace star with asterisk in the schedule above)
+ * See vercel.json for the configured schedule (every 6 hours)
  */
 export async function GET(request: NextRequest) {
   try {

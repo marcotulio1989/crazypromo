@@ -3,6 +3,7 @@ import { PrismaClient } from '@prisma/client'
 import { PrismaPg } from '@prisma/adapter-pg'
 import pg from 'pg'
 import bcrypt from 'bcryptjs'
+import crypto from 'crypto'
 
 // Use localhost only in development
 const databaseUrl = process.env.DATABASE_URL || 
@@ -25,7 +26,7 @@ async function main() {
   const adminPassword = process.env.ADMIN_PASSWORD 
     ? await bcrypt.hash(process.env.ADMIN_PASSWORD, 10)
     : await bcrypt.hash(
-        Math.random().toString(36).slice(-12) + Math.random().toString(36).slice(-12), 
+        crypto.randomBytes(16).toString('hex'), 
         10
       )
   
