@@ -41,15 +41,16 @@ function mapAffiliateConfig(
   affiliateConfig: unknown,
   includeSensitive: boolean
 ): Record<string, string> | null {
-  if (!affiliateConfig) {
+  if (!affiliateConfig || typeof affiliateConfig !== 'object') {
     return null
   }
 
+  const config = affiliateConfig as Record<string, string>
+
   if (includeSensitive) {
-    return affiliateConfig as Record<string, string>
+    return config
   }
 
-  const config = affiliateConfig as Record<string, string>
   return config.type ? { type: config.type } : null
 }
 

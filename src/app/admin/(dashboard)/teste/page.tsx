@@ -49,6 +49,7 @@ const LOMADEE_ENDPOINTS: LomadeeEndpoint[] = [
 ]
 
 export default function AdminTesteLomadee() {
+  const [isAdminUser, setIsAdminUser] = useState(true)
   const [stores, setStores] = useState<StoreOption[]>([])
   const [selectedStoreId, setSelectedStoreId] = useState('')
   const [apiBaseUrl, setApiBaseUrl] = useState('https://api.lomadee.com.br')
@@ -73,6 +74,10 @@ export default function AdminTesteLomadee() {
       try {
         const res = await fetch('/api/stores?onlyActive=false&includeSensitive=true')
         const data = await res.json()
+        if (res.status === 401) {
+          setIsAdminUser(false)
+          return
+        }
         setStores(Array.isArray(data) ? data : data.stores || [])
       } catch (error) {
         console.error('Erro ao carregar lojas:', error)
@@ -104,6 +109,11 @@ export default function AdminTesteLomadee() {
     setErrors(prev => ({ ...prev, [endpoint.id]: '' }))
 
     try {
+      if (!isAdminUser) {
+        setErrors(prev => ({ ...prev, [endpoint.id]: 'Acesso restrito a administradores.' }))
+        return
+      }
+
       const res = await fetch('/api/lomadee', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

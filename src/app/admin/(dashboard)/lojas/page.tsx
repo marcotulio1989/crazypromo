@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Plus, Search, Trash2, ExternalLink, Settings } from 'lucide-react'
 
+// Configuração de afiliados (inclui detalhes específicos da Lomadee)
 interface AffiliateConfig {
   type?: string
   paramName?: string
@@ -407,10 +408,11 @@ function StoreModal({
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="lomadee-api-key" className="block text-sm font-medium text-gray-700 mb-1">
               API Key (x-api-key)
             </label>
             <input
+              id="lomadee-api-key"
               type="password"
               value={formData.lomadeeApiKey}
               onChange={(e) => setFormData({ ...formData, lomadeeApiKey: e.target.value })}
