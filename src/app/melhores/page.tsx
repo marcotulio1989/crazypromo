@@ -2,6 +2,8 @@ import { prisma } from '@/lib/prisma'
 import PromotionGrid from '@/components/PromotionGrid'
 import Link from 'next/link'
 
+export const revalidate = 300
+
 async function getBestDeals(): Promise<Parameters<typeof PromotionGrid>[0]['promotions']> {
   try {
     return await prisma.promotion.findMany({

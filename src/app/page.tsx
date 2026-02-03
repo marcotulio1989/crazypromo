@@ -3,6 +3,8 @@ import { prisma } from '@/lib/prisma'
 import PromotionGrid from '@/components/PromotionGrid'
 import { Flame, TrendingUp, Shield, Zap } from 'lucide-react'
 
+export const revalidate = 300
+
 async function getFeaturedPromotions() {
   try {
     return await prisma.promotion.findMany({
