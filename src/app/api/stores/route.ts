@@ -8,6 +8,14 @@ export async function GET(request: NextRequest) {
   const onlyActive = searchParams.get('onlyActive') !== 'false'
   const includeSensitive = searchParams.get('includeSensitive') === 'true'
 
+  if (includeSensitive) {
+    const session = await auth()
+
+    if (!session || session.user.role !== 'ADMIN') {
+      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+    }
+  }
+
   const where = onlyActive ? { isActive: true } : {}
 
   const stores = await prisma.store.findMany({
@@ -20,25 +28,29 @@ export async function GET(request: NextRequest) {
     orderBy: { name: 'asc' }
   })
 
-  if (includeSensitive) {
-    const session = await auth()
-
-    if (!session || session.user.role !== 'ADMIN') {
-      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
-    }
-  }
-
   return NextResponse.json(
     stores.map(({ affiliateConfig, affiliateId, ...store }) => ({
       ...store,
       affiliateId,
-      affiliateConfig: includeSensitive
-        ? affiliateConfig
-        : affiliateConfig
-          ? { type: (affiliateConfig as Record<string, string>).type }
-          : null
+      affiliateConfig: mapAffiliateConfig(affiliateConfig, includeSensitive)
     }))
   )
+}
+
+function mapAffiliateConfig(
+  affiliateConfig: unknown,
+  includeSensitive: boolean
+): Record<string, string> | null {
+  if (!affiliateConfig) {
+    return null
+  }
+
+  if (includeSensitive) {
+    return affiliateConfig as Record<string, string>
+  }
+
+  const config = affiliateConfig as Record<string, string>
+  return config.type ? { type: config.type } : null
 }
 
 // POST - Criar loja

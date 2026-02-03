@@ -3,6 +3,16 @@
 import { useState, useEffect } from 'react'
 import { Plus, Search, Trash2, ExternalLink, Settings } from 'lucide-react'
 
+interface AffiliateConfig {
+  type?: string
+  paramName?: string
+  customTemplate?: string
+  merchantId?: string
+  lomadeeApiKey?: string
+  lomadeeBaseUrl?: string
+  lomadeeSourceId?: string
+}
+
 interface Store {
   id: string
   name: string
@@ -11,7 +21,7 @@ interface Store {
   website: string
   affiliateId: string | null
   affiliateUrl?: string | null
-  affiliateConfig?: Record<string, string> | null
+  affiliateConfig?: AffiliateConfig | null
   commission: number | null
   isActive: boolean
   _count: {
