@@ -8,7 +8,7 @@ interface PriceHistoryChartProps {
   data: Array<{
     id: string
     price: number
-    createdAt: string
+    createdAt: string | Date
   }>
   currentPrice: number
   averagePrice?: number | null

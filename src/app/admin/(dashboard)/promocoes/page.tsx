@@ -15,7 +15,7 @@ interface Promotion {
   isRealDeal: boolean
   isActive: boolean
   isFeatured: boolean
-  createdAt: string
+  createdAt: string | Date
   product: {
     name: string
     store: {
