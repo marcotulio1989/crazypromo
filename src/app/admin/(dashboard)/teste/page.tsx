@@ -19,6 +19,13 @@ interface LomadeeEndpoint {
 
 const LOMADEE_ENDPOINTS: LomadeeEndpoint[] = [
   {
+    id: 'orders',
+    label: 'Pedidos / Orders',
+    path: '/affiliate/orders',
+    description: 'Retorna todos os pedidos do sistema que o usuário tem acesso.',
+    defaultParams: { page: '1', limit: '10' }
+  },
+  {
     id: 'brands',
     label: 'Lojas / Brands',
     path: '/affiliate/brands',
@@ -52,7 +59,7 @@ export default function AdminTesteLomadee() {
   const [isAdminUser, setIsAdminUser] = useState(true)
   const [stores, setStores] = useState<StoreOption[]>([])
   const [selectedStoreId, setSelectedStoreId] = useState('')
-  const [apiBaseUrl, setApiBaseUrl] = useState('https://api.lomadee.com.br')
+  const [apiBaseUrl, setApiBaseUrl] = useState('https://api-beta.lomadee.com.br')
   const [apiKey, setApiKey] = useState('')
   const [sourceId, setSourceId] = useState('')
   const [running, setRunning] = useState<string | null>(null)
@@ -95,7 +102,7 @@ export default function AdminTesteLomadee() {
   useEffect(() => {
     if (!selectedStore?.affiliateConfig) return
     const config = selectedStore.affiliateConfig
-    setApiBaseUrl(config.lomadeeBaseUrl || 'https://api.lomadee.com.br')
+    setApiBaseUrl(config.lomadeeBaseUrl || 'https://api-beta.lomadee.com.br')
     setApiKey(config.lomadeeApiKey || '')
     setSourceId(config.lomadeeSourceId || '')
   }, [selectedStore])
@@ -203,7 +210,7 @@ export default function AdminTesteLomadee() {
               value={apiBaseUrl}
               onChange={(e) => setApiBaseUrl(e.target.value)}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-              placeholder="https://api.lomadee.com.br"
+              placeholder="https://api-beta.lomadee.com.br"
             />
           </div>
           <div>
