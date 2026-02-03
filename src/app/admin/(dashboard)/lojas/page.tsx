@@ -8,8 +8,11 @@ interface AffiliateConfig {
   paramName?: string
   customTemplate?: string
   merchantId?: string
+  // Chave Lomadee usada no header x-api-key
   lomadeeApiKey?: string
+  // Base URL da Lomadee (ex: https://api.lomadee.com.br)
   lomadeeBaseUrl?: string
+  // Source ID Lomadee opcional quando exigido
   lomadeeSourceId?: string
 }
 

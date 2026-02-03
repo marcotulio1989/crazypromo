@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
   if (includeSensitive) {
     const session = await auth()
 
-    if (!session || session.user.role !== 'ADMIN') {
+    if (!session || !session.user || session.user.role !== 'ADMIN') {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
     }
   }

@@ -2,7 +2,7 @@ import { prisma } from '@/lib/prisma'
 import PromotionGrid from '@/components/PromotionGrid'
 import Link from 'next/link'
 
-async function getBestDeals() {
+async function getBestDeals(): Promise<Parameters<typeof PromotionGrid>[0]['promotions']> {
   try {
     return await prisma.promotion.findMany({
       where: {
@@ -20,7 +20,7 @@ async function getBestDeals() {
       },
       orderBy: { dealScore: 'desc' },
       take: 20
-    })
+    }) as Parameters<typeof PromotionGrid>[0]['promotions']
   } catch {
     return []
   }
@@ -43,7 +43,7 @@ export default async function MelhoresPage() {
           Nenhuma oferta de destaque encontrada.
         </div>
       ) : (
-        <PromotionGrid promotions={bestDeals as unknown as Parameters<typeof PromotionGrid>[0]['promotions']} />
+        <PromotionGrid promotions={bestDeals} />
       )}
     </div>
   )
