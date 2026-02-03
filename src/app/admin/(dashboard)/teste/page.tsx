@@ -270,7 +270,7 @@ export default function AdminTesteLomadee() {
               </div>
             )}
 
-            {responses[endpoint.id] && (
+            {typeof responses[endpoint.id] !== 'undefined' && (
               <div className="mt-4 bg-gray-50 border border-gray-200 rounded-lg p-4">
                 <pre className="text-xs text-gray-700 whitespace-pre-wrap break-words">
                   {JSON.stringify(responses[endpoint.id], null, 2)}

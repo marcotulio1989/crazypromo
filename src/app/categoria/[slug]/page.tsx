@@ -1,6 +1,8 @@
 import Link from 'next/link'
 import { prisma } from '@/lib/prisma'
 
+export const revalidate = 300
+
 async function getCategory(slug: string) {
   try {
     return await prisma.category.findUnique({
