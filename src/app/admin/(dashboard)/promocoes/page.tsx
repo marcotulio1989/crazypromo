@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { Plus, Search, Edit, Trash2, Eye, Award } from 'lucide-react'
 import Link from 'next/link'
 import DealScoreBadge from '@/components/DealScoreBadge'
+import ExportButtons from '@/components/ExportButtons'
 
 interface Promotion {
   id: string
@@ -95,13 +96,16 @@ export default function AdminPromocoes() {
     <div>
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-3xl font-bold text-gray-800">Promoções</h1>
-        <Link
-          href="/admin/promocoes/nova"
-          className="flex items-center gap-2 bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors"
-        >
-          <Plus className="w-5 h-5" />
-          Nova Promoção
-        </Link>
+        <div className="flex items-center gap-4">
+          <ExportButtons resource="promotions" />
+          <Link
+            href="/admin/promocoes/nova"
+            className="flex items-center gap-2 bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors"
+          >
+            <Plus className="w-5 h-5" />
+            Nova Promoção
+          </Link>
+        </div>
       </div>
 
       {/* Stats */}
