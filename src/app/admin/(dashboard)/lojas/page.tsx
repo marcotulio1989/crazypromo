@@ -1,8 +1,21 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import Link from 'next/link'
-import { Plus, Search, Edit, Trash2, ExternalLink, Settings } from 'lucide-react'
+import { Plus, Search, Trash2, ExternalLink, Settings } from 'lucide-react'
+
+// Configuração de afiliados (inclui detalhes específicos da Lomadee)
+interface AffiliateConfig {
+  type?: string
+  paramName?: string
+  customTemplate?: string
+  merchantId?: string
+  // Chave Lomadee usada no header x-api-key
+  lomadeeApiKey?: string
+  // Base URL da Lomadee (ex: https://api.lomadee.com.br)
+  lomadeeBaseUrl?: string
+  // Source ID Lomadee opcional quando exigido
+  lomadeeSourceId?: string
+}
 
 interface Store {
   id: string
@@ -11,6 +24,8 @@ interface Store {
   logo: string | null
   website: string
   affiliateId: string | null
+  affiliateUrl?: string | null
+  affiliateConfig?: AffiliateConfig | null
   commission: number | null
   isActive: boolean
   _count: {
@@ -31,7 +46,7 @@ export default function AdminLojas() {
 
   const fetchStores = async () => {
     try {
-      const res = await fetch('/api/stores?onlyActive=false')
+      const res = await fetch('/api/stores?onlyActive=false&includeSensitive=true')
       const data = await res.json()
       setStores(data)
     } catch (error) {
@@ -86,7 +101,12 @@ export default function AdminLojas() {
 
       {/* Stores Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredStores.map((store) => (
+      {loading ? (
+        <div className="col-span-full flex items-center justify-center py-12">
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-orange-500"></div>
+        </div>
+      ) : (
+        filteredStores.map((store) => (
           <div key={store.id} className="bg-white rounded-xl shadow-md overflow-hidden">
             <div className="p-6">
               <div className="flex items-start justify-between mb-4">
@@ -146,8 +166,9 @@ export default function AdminLojas() {
               </div>
             </div>
           </div>
-        ))}
-      </div>
+        ))
+      )}
+    </div>
 
       {/* Modal */}
       {showModal && (
@@ -175,10 +196,15 @@ function StoreModal({
     website: store?.website || '',
     logo: store?.logo || '',
     affiliateId: store?.affiliateId || '',
-    affiliateUrl: '',
+    affiliateUrl: store?.affiliateUrl || '',
     commission: store?.commission?.toString() || '',
-    affiliateType: 'query_param',
-    affiliateParamName: 'tag',
+    affiliateType: store?.affiliateConfig?.type || 'query_param',
+    affiliateParamName: store?.affiliateConfig?.paramName || 'tag',
+    affiliateCustomTemplate: store?.affiliateConfig?.customTemplate || '',
+    affiliateMerchantId: store?.affiliateConfig?.merchantId || '',
+    lomadeeApiKey: store?.affiliateConfig?.lomadeeApiKey || '',
+    lomadeeBaseUrl: store?.affiliateConfig?.lomadeeBaseUrl || 'https://api.lomadee.com.br',
+    lomadeeSourceId: store?.affiliateConfig?.lomadeeSourceId || '',
     isActive: store?.isActive ?? true
   })
   const [loading, setLoading] = useState(false)
@@ -190,7 +216,12 @@ function StoreModal({
     try {
       const affiliateConfig = {
         type: formData.affiliateType,
-        paramName: formData.affiliateParamName
+        paramName: formData.affiliateParamName,
+        customTemplate: formData.affiliateCustomTemplate,
+        merchantId: formData.affiliateMerchantId,
+        lomadeeApiKey: formData.lomadeeApiKey,
+        lomadeeBaseUrl: formData.lomadeeBaseUrl,
+        lomadeeSourceId: formData.lomadeeSourceId
       }
 
       const url = store ? `/api/stores/${store.id}` : '/api/stores'
@@ -318,6 +349,35 @@ function StoreModal({
             </div>
           )}
 
+          {formData.affiliateType === 'custom' && (
+            <div className="space-y-3">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Template de Afiliado
+                </label>
+                <input
+                  type="text"
+                  value={formData.affiliateCustomTemplate}
+                  onChange={(e) => setFormData({ ...formData, affiliateCustomTemplate: e.target.value })}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-transparent font-mono text-sm"
+                  placeholder="https://redir.lomadee.com/v2/deeplink?sourceId={affiliateId}&url={url}"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Merchant ID (opcional)
+                </label>
+                <input
+                  type="text"
+                  value={formData.affiliateMerchantId}
+                  onChange={(e) => setFormData({ ...formData, affiliateMerchantId: e.target.value })}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-transparent font-mono text-sm"
+                  placeholder="ID do anunciante"
+                />
+              </div>
+            </div>
+          )}
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Comissão (%)
@@ -329,6 +389,47 @@ function StoreModal({
               onChange={(e) => setFormData({ ...formData, commission: e.target.value })}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-transparent"
               placeholder="5.0"
+            />
+          </div>
+
+          <hr className="my-4" />
+          <h3 className="font-semibold text-gray-800">Configuração Lomadee</h3>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Base URL Lomadee
+            </label>
+            <input
+              type="url"
+              value={formData.lomadeeBaseUrl}
+              onChange={(e) => setFormData({ ...formData, lomadeeBaseUrl: e.target.value })}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+              placeholder="https://api.lomadee.com.br"
+            />
+          </div>
+          <div>
+            <label htmlFor="lomadee-api-key" className="block text-sm font-medium text-gray-700 mb-1">
+              API Key (x-api-key)
+            </label>
+            <input
+              id="lomadee-api-key"
+              type="password"
+              value={formData.lomadeeApiKey}
+              onChange={(e) => setFormData({ ...formData, lomadeeApiKey: e.target.value })}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-transparent font-mono"
+              placeholder="Cole sua chave"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Source ID (opcional)
+            </label>
+            <input
+              type="text"
+              value={formData.lomadeeSourceId}
+              onChange={(e) => setFormData({ ...formData, lomadeeSourceId: e.target.value })}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-transparent font-mono"
+              placeholder="sourceId"
             />
           </div>
 

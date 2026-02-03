@@ -17,6 +17,7 @@ Sistema inteligente de promoções com links de afiliados que analisa histórico
 - ✅ Cadastrar produtos com monitoramento de preços
 - ✅ Criar promoções com análise automática
 - ✅ Rastreamento de cliques nos links
+- ✅ Painel de testes Lomadee (disparar APIs e validar respostas)
 
 ### Sistema Inteligente
 - 🧠 Análise de histórico de preços
@@ -122,6 +123,26 @@ O sistema suporta diferentes formatos de links de afiliados:
 5. Salve as alterações
 
 Os links de todos os produtos dessa loja serão atualizados automaticamente!
+
+## 🧪 Painel de Testes Lomadee
+
+O painel **Teste Lomadee** no admin permite disparar as principais APIs (Brands, Categories,
+Products, Campaigns) individualmente ou em lote, com parâmetros customizados.
+
+### Como configurar
+1. Vá em **Lojas & Afiliados** e informe:
+   - **Base URL** (ex: `https://api.lomadee.com.br`)
+   - **API Key** (header `x-api-key`)
+   - **Source ID** (opcional, quando exigido)
+2. No menu **Teste Lomadee**, selecione a loja para carregar essas credenciais.
+3. Ajuste os parâmetros de query e clique em **Disparar API**.
+
+### Referência rápida
+- **Autenticação:** header `x-api-key`
+- **Base URL padrão:** `https://api.lomadee.com.br`
+- **Endpoints comuns:** `/affiliate/brands`, `/affiliate/categories`, `/affiliate/products`, `/affiliate/campaigns`
+
+Consulte a documentação oficial da Lomadee para parâmetros atualizados.
 
 ## 📊 Como Funciona o Deal Score
 

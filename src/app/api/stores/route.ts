@@ -1,11 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { updateStoreAffiliateLinks } from '@/lib/affiliate-link-generator'
+import { auth } from '@/lib/auth'
 
 // GET - Listar lojas
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams
   const onlyActive = searchParams.get('onlyActive') !== 'false'
+  const includeSensitive = searchParams.get('includeSensitive') === 'true'
+
+  if (includeSensitive) {
+    const session = await auth()
+
+    if (!session || !session.user || session.user.role !== 'ADMIN') {
+      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+    }
+  }
 
   const where = onlyActive ? { isActive: true } : {}
 
@@ -19,7 +28,30 @@ export async function GET(request: NextRequest) {
     orderBy: { name: 'asc' }
   })
 
-  return NextResponse.json(stores)
+  return NextResponse.json(
+    stores.map(({ affiliateConfig, affiliateId, ...store }) => ({
+      ...store,
+      affiliateId,
+      affiliateConfig: mapAffiliateConfig(affiliateConfig, includeSensitive)
+    }))
+  )
+}
+
+function mapAffiliateConfig(
+  affiliateConfig: unknown,
+  includeSensitive: boolean
+): Record<string, string> | null {
+  if (!affiliateConfig || typeof affiliateConfig !== 'object') {
+    return null
+  }
+
+  const config = affiliateConfig as Record<string, string>
+
+  if (includeSensitive) {
+    return config
+  }
+
+  return config.type ? { type: config.type } : null
 }
 
 // POST - Criar loja
@@ -34,7 +66,10 @@ export async function POST(request: NextRequest) {
       affiliateUrl,
       affiliateId,
       affiliateConfig,
-      commission
+      commission,
+      feedUrl,
+      feedType,
+      feedMapping
     } = body
 
     // Gerar slug
@@ -55,7 +90,10 @@ export async function POST(request: NextRequest) {
         affiliateUrl,
         affiliateId,
         affiliateConfig,
-        commission
+        commission,
+        feedUrl,
+        feedType,
+        feedMapping
       }
     })
 

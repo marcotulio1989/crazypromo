@@ -67,6 +67,7 @@ export default function PromocoesPage() {
 
   useEffect(() => {
     fetchPromotions()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, filters])
 
   const fetchCategories = async () => {
