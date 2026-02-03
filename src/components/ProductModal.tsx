@@ -25,7 +25,7 @@ import { useOpenTabs } from '@/contexts/OpenTabsContext'
 interface PriceHistory {
   id: string
   price: number
-  createdAt: string
+  createdAt: string | Date
 }
 
 interface Promotion {
@@ -36,7 +36,7 @@ interface Promotion {
   discountPercent: number
   isRealDeal: boolean
   dealScore: number | null
-  createdAt: string
+  createdAt: string | Date
   product: {
     id: string
     name: string

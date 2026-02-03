@@ -3,6 +3,10 @@
 import "dotenv/config";
 import { defineConfig } from "prisma/config";
 
+// Note: DATABASE_URL may be undefined during build time (e.g., CI/CD).
+// Prisma generate works without a valid URL; runtime connection will fail if not set.
+const databaseUrl = process.env["DATABASE_URL"] ?? "";
+
 export default defineConfig({
   schema: "prisma/schema.prisma",
   migrations: {
@@ -10,6 +14,6 @@ export default defineConfig({
     seed: "npx tsx prisma/seed.ts",
   },
   datasource: {
-    url: process.env["DATABASE_URL"],
+    url: databaseUrl,
   },
 });

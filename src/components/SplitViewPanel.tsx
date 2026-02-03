@@ -29,7 +29,7 @@ interface Promotion {
   discountPercent: number
   isRealDeal: boolean
   dealScore: number | null
-  createdAt: string
+  createdAt: string | Date
   product: {
     id: string
     name: string
