@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Plus, Search, Trash2, ExternalLink, Settings } from 'lucide-react'
+import ExportButtons from '@/components/ExportButtons'
 
 // Configuração de afiliados (inclui detalhes específicos da Lomadee)
 interface AffiliateConfig {
@@ -76,13 +77,16 @@ export default function AdminLojas() {
     <div>
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-3xl font-bold text-gray-800">Lojas & Afiliados</h1>
-        <button
-          onClick={() => { setEditingStore(null); setShowModal(true) }}
-          className="flex items-center gap-2 bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors"
-        >
-          <Plus className="w-5 h-5" />
-          Nova Loja
-        </button>
+        <div className="flex items-center gap-4">
+          <ExportButtons resource="stores" />
+          <button
+            onClick={() => { setEditingStore(null); setShowModal(true) }}
+            className="flex items-center gap-2 bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors"
+          >
+            <Plus className="w-5 h-5" />
+            Nova Loja
+          </button>
+        </div>
       </div>
 
       {/* Search */}

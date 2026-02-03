@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Plus, Search, Edit, Trash2, TrendingUp, Eye } from 'lucide-react'
 import Link from 'next/link'
+import ExportButtons from '@/components/ExportButtons'
 
 interface Product {
   id: string
@@ -71,13 +72,16 @@ export default function AdminProdutos() {
     <div>
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-3xl font-bold text-gray-800">Produtos</h1>
-        <Link
-          href="/admin/produtos/novo"
-          className="flex items-center gap-2 bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors"
-        >
-          <Plus className="w-5 h-5" />
-          Novo Produto
-        </Link>
+        <div className="flex items-center gap-4">
+          <ExportButtons resource="products" />
+          <Link
+            href="/admin/produtos/novo"
+            className="flex items-center gap-2 bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors"
+          >
+            <Plus className="w-5 h-5" />
+            Novo Produto
+          </Link>
+        </div>
       </div>
 
       {/* Search */}
