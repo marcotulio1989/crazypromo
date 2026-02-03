@@ -197,13 +197,12 @@ export async function GET(request: NextRequest) {
       case 'categories':
         data = await fetchCategories()
         break
-      default:
-        return NextResponse.json({ error: 'Recurso não encontrado' }, { status: 404 })
     }
 
     const contentType = getContentType(format)
     const fileExtension = getFileExtension(format)
-    const filename = `${resource}_${new Date().toISOString().split('T')[0]}.${fileExtension}`
+    const todayDateString = new Date().toISOString().slice(0, 10)
+    const filename = `${resource}_${todayDateString}.${fileExtension}`
 
     let content: string
     if (format === 'csv') {
