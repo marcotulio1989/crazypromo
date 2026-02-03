@@ -13,9 +13,6 @@
     "db:seed": "npx tsx prisma/seed.ts",
     "db:studio": "prisma studio"
   },
-  "prisma": {
-    "seed": "npx tsx prisma/seed.ts"
-  },
   "dependencies": {
     "@prisma/adapter-pg": "^6.19.2",
     "@prisma/client": "^6.19.2",
